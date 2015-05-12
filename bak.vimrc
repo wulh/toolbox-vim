@@ -27,6 +27,10 @@ if has("gui_running")
     :set nofu
 endif
 
+if bufwinnr(1)
+    map = <C-W>=
+endif
+
 set tabstop=4
 set shiftwidth=4
 set softtabstop=4
@@ -92,11 +96,16 @@ nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 nnoremap <C-h> <C-w>h
 
-map <C-m> :NERDTreeToggle<CR>
+map <F4> :NERDTreeToggle<CR>
 
 map <leader>g :GundoToggle<CR>
 
 nmap <leader>a <Esc>:Ack!
+
+map <leader>s :TagbarToggle<CR>
+"map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
+map <C-\> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
+set tags=./tags;/
 
 let g:pep8_map='<leader>8'
 
@@ -119,7 +128,7 @@ if executable('ag')
     let g:ackprg = 'ag --vimgrep'
 endif
 
-map <C-g> <Esc>:w<CR>:call RunOneFile()<CR>
+map <F5> <Esc>:w<CR>:call RunOneFile()<CR>
 function! RunOneFile()
     if &filetype=='vim'
         source %
