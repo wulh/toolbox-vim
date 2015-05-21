@@ -107,8 +107,6 @@ map <leader>s :TagbarToggle<CR>
 map <C-\> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 set tags=./tags;/
 
-let g:pep8_map='<leader>8'
-
 let g:jedi#goto_definitions_command = "<leader>d"
 let g:jedi#documentations_command = "K"
 let g:jedi#usages_command = "<leader>n"
@@ -123,6 +121,16 @@ set foldlevel=99
 "set completeopt=menuone,longest,preview
 
 let g:jedi#completions_command = "<C-J>"
+
+"syntastic setting
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 1
 
 if executable('ag')
     let g:ackprg = 'ag --vimgrep'
