@@ -26,7 +26,7 @@ if has("gui_running")
     :set fu
     :set nofu
 endif
-
+"make split window resize equally
 if bufwinnr(1)
     map = <C-W>=
 endif
@@ -88,8 +88,11 @@ inoremap <right> <nop>
 nnoremap j gj
 nnoremap k gk
 
+nmap <C-S-J> o<Esc>k
 nnoremap <leader>W :%s/\s\+$//<cr>:let @/=''<CR>
 nnoremap <leader>w <C-w>v<C-w>l
+"format json string
+nnoremap <leader>fj :%!python -m json.tool<cr>
 
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
@@ -107,20 +110,35 @@ map <leader>s :TagbarToggle<CR>
 map <C-\> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 set tags=./tags;/
 
+set wildignore+=*.swp,*.zip,*.pyc,*.*~
+
 let g:jedi#goto_definitions_command = "<leader>d"
 let g:jedi#documentations_command = "K"
 let g:jedi#usages_command = "<leader>n"
 let g:jedi#completions_command = "<C-Space>"
 let g:jedi#rename_command = "<leader>r"
+let g:jedi#use_tabs_not_buffers = 0
+let g:jedi#completions_command = "<C-J>"
 
 set foldmethod=indent
 set foldlevel=99
 
-"au FileType python set omnifunc=pythoncomplete#Complete
-"let g:SuperTabDefaultCompletionType = "context"
-"set completeopt=menuone,longest,preview
-
-let g:jedi#completions_command = "<C-J>"
+" let jedi autocomplete works
+if has('python')
+py << EOF
+import os.path
+import sys
+import vim
+localpath = os.path.join("/usr/local/lib/", "python%d.%d" % sys.version_info[:2], "site-packages")
+sys.path.append(localpath)
+sys.path.append(os.path.join(localpath, "nose-1.3.6-py2.7.egg"))
+if 'VIRTUAL_ENV' in os.environ:
+    project_base_dir = os.environ['VIRTUAL_ENV']
+    sys.path.insert(0, os.path.join(project_base_dir, 'lib', 'python%d.%d' % sys.version_info[:2], 'site-packages'))
+EOF
+endif
+set omnifunc=jedi#completions
+set completeopt=menuone,longest,preview
 
 "syntastic setting
 set statusline+=%#warningmsg#
@@ -132,11 +150,14 @@ let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 1
 
+"comment setting
+let g:NERDSpaceDelims = 1
+
 if executable('ag')
     let g:ackprg = 'ag --vimgrep'
 endif
 
-map <F5> <Esc>:w<CR>:call RunOneFile()<CR>
+map <F12> <Esc>:w<CR>:call RunOneFile()<CR>
 function! RunOneFile()
     if &filetype=='vim'
         source %
@@ -148,3 +169,5 @@ function! RunOneFile()
         endif
     endif
 endfunction
+
+ia pdb import pdb; pdb.set_trace()<ESC>
