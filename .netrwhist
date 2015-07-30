@@ -1,0 +1,8 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =6
+let g:netrw_dirhist_1='/Users/wulh/.vim'
+let g:netrw_dirhist_2='/usr/local/etc/privoxy'
+let g:netrw_dirhist_3='/Users/wulh/Projects/longan/longan'
+let g:netrw_dirhist_4='/Users/wulh/Temp/requests/requests/packages/urllib3/util'
+let g:netrw_dirhist_5='/Users/wulh/Projects/sample/sample/pkg'
+let g:netrw_dirhist_6='/usr/local'
