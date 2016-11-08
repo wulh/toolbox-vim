@@ -301,8 +301,8 @@ let g:easytags_updatetime_min = 10000
 let g:easytags_events = ['BufWritePost']
 
 " jedi-vim
-" let g:jedi#auto_initializatin = 0
-" let g:jedi#auto_vim_configuration = 0
+let g:jedi#auto_initializatin = 0
+let g:jedi#auto_vim_configuration = 0
 let g:jedi#completions_enabled = 0
 let g:jedi#popup_on_dot = 1
 let g:jedi#popup_select_first = 0
