@@ -132,6 +132,8 @@ else
 endif
 
 "=========== Abbreviations Setting =============
+"" make dot action works in visual mode
+vnoremap . :norm.<CR>
 "" no one is really happy until you have this shortcuts
 cnoreabbrev W! w!
 cnoreabbrev Q! q!
@@ -257,6 +259,8 @@ nnoremap <leader>. :lcd %:p:h<CR>
 noremap <Leader>e :e <C-R>=expand("%:p:h") . "/" <CR>
 "
 "============= plugins setting ===============
+"" YouCompleteMe
+"
 "" NERDTree configuration
 let g:NERDTreeChDirMode=2
 let g:NERDTreeIgnore=['\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
@@ -266,7 +270,7 @@ let g:nerdtree_tabs_focus_on_files=1
 let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
 let g:NERDTreeWinSize = 50
 let g:NERDSpaceDelims = 1
-set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite
+set wildignore+=*/build/*,*/tmp/*,*.so,*.swp,*.zip,*.pyc,*.db,*.sqlite
 nnoremap <silent> <F2> :NERDTreeFind<CR>
 noremap <F4> :NERDTreeToggle<CR>
 
@@ -291,8 +295,17 @@ let g:tagbar_autofocus = 1
 map <C-\> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 set tags=./tags;/
 
+" easy-tag
+let g:easytags_auto_update = 0
+let g:easytags_updatetime_min = 10000
+let g:easytags_events = ['BufWritePost']
+
 " jedi-vim
-let g:jedi#popup_on_dot = 0
+" let g:jedi#auto_initializatin = 0
+" let g:jedi#auto_vim_configuration = 0
+let g:jedi#completions_enabled = 0
+let g:jedi#popup_on_dot = 1
+let g:jedi#popup_select_first = 0
 let g:jedi#goto_definitions_command = "<leader>d"
 let g:jedi#documentations_command = "K"
 let g:jedi#usages_command = "<leader>n"
@@ -304,25 +317,26 @@ let g:jedi#use_tabs_not_buffers = 0
 set shell=/bin/sh
 
 " set omnifunc=jedi#completions
-set completeopt=menuone,longest,preview
+" set completeopt=menuone,longest,preview
 
 "syntastic setting
+:command SD SyntasticToggleMode
+" , 'flake8'
 let g:syntastic_python_checkers=['python', 'flake8']
 let g:syntastic_python_flake8_post_args='--ignore=W391'
+" , 'eslint'
+let g:syntastic_javascript_checkers=['eslint']
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
-let g:syntastic_always_populate_loc_list=1
+let g:syntastic_always_populate_loc_list=0
 let g:syntastic_error_symbol='✗'
 let g:syntastic_warning_symbol='⚠'
 let g:syntastic_style_error_symbol = '✗'
 let g:syntastic_style_warning_symbol = '⚠'
 let g:syntastic_auto_loc_list=1
 let g:syntastic_aggregate_errors = 1
-
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_open = 0
 let g:syntastic_check_on_wq = 1
 
 " ag
@@ -331,9 +345,10 @@ if executable('ag')
     " Use ag in CtrlP for listing files. Lightning fast and respects .gitignore
     let g:ctrlp_user_command = 'ag %s -l --nocolor -g ""'
 endif
+" 
 " ctrlp
 let g:ctrlp_match_func = {'match': 'pymatcher#PyMatch'}
-let g:ctrlp_custom_ignore = '\v[\/](node_modules|target|dist)|(\.(swp|tox|ico|git|hg|svn))$'
+let g:ctrlp_custom_ignore = '\v[\/](node_modules|target|dist|build)|(\.(swp|tox|ico|git|hg|svn))$'
 let g:ctrlp_user_command = "find %s -type f | grep -Ev '"+ g:ctrlp_custom_ignore +"'"
 let g:ctrlp_use_caching = 0
 let g:ctrlp_open_new_file = 'r'
@@ -344,6 +359,123 @@ let g:session_command_aliases = 1
 let g:session_autoload = "no"
 let g:session_autosave = 'no'
 
+" tmux
+" Fix Cursor in TMUX
+if exists('$TMUX')
+  let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
+  let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
+else
+  let &t_SI = "\<Esc>]50;CursorShape=1\x7"
+  let &t_EI = "\<Esc>]50;CursorShape=0\x7"
+endif
+" vim-tmux
+" Prompt for a command to run
+map ,p :VimuxPromptCommand<CR>
+" Run a command as arg
+map ,r :VimuxRunCommand
+" Run last command executed by RunVimTmuxCommand
+map ,l :VimuxRunLastCommand
+" Inspect runner pane
+map ,i :VimuxInspectRunner
+" Close all other tmux panes in current window
+map ,x :VimuxTogglePane
+" Interrupt any command running in the runner pane
+map ,s :VimuxInterruptRunner
+
+"================= For Python ==================
+" Add custom library path, let jedi autocomplete works
+" py << EOF
+" import os
+" import sys
+" import vim
+" localpath = os.path.join("/usr/local/lib/", "python%d.%d" % sys.version_info[:2], "site-packages")
+" sys.path.append(localpath)
+" sys.path.append(os.path.join(localpath, "nose-1.3.6-py2.7.egg"))
+" if 'VIRTUAL_ENV' in os.environ:
+    " project_base_dir = os.environ['VIRTUAL_ENV']
+    " sys.path.insert(0, os.path.join(project_base_dir, 'lib', 'python%d.%d' % sys.version_info[:2], 'site-packages'))
+" EOF
+if has('python')
+" Execute a selection of code (very cool!)
+" Use VISUAL to select a range and then hit ctrl-h to execute it.
+python << EOL
+import vim
+def EvaluateCurrentRange():
+    eval(compile('\n'.join(vim.current.range),'','exec'),globals())
+EOL
+map <F11> :py EvaluateCurrentRange()
+
+" Use F7/Shift-F7 to add/remove a breakpoint (pdb.set_trace)
+" Totally cool.
+python << EOF
+def SetBreakpoint():
+    import re
+    nLine = int( vim.eval( 'line(".")'))
+
+    strLine = vim.current.line
+    strWhite = re.search( '^(\s*)', strLine).group(1)
+
+    vim.current.buffer.append(
+       "%(space)spdb.set_trace()" %
+         {'space':strWhite}, nLine - 1)
+    vim.current.buffer.append(
+       "%(space)s%(mark)s Breakpoint %(mark)s" %
+         {'space':strWhite, 'mark': '#' * 10}, nLine - 1)
+
+    for strLine in vim.current.buffer:
+        if strLine == "import pdb":
+            break
+    else:
+        vim.current.buffer.append( 'import pdb', 0)
+        vim.command( 'normal j1')
+
+vim.command( 'map <f7> :py SetBreakpoint()<cr>')
+
+def RemoveBreakpoints():
+    import re
+
+    nCurrentLine = int( vim.eval( 'line(".")'))
+
+    nLines = []
+    nLine = 1
+    for strLine in vim.current.buffer:
+        if strLine == "import pdb" or strLine.lstrip()[:15] == "pdb.set_trace()"\
+				or "Breakpoint" in strLine:
+            nLines.append(nLine)
+        nLine += 1
+
+    nLines.reverse()
+
+    for nLine in nLines:
+        vim.command( "normal %dG" % nLine)
+        vim.command( "normal dd")
+        if nLine < nCurrentLine:
+            nCurrentLine -= 1
+
+    vim.command( "normal %dG" % nCurrentLine)
+
+vim.command( "map <s-f7> :py RemoveBreakpoints()<cr>")
+EOF
+endif
+"
+" vim-python
+augroup vimrc-python
+  autocmd!
+  autocmd FileType python setlocal expandtab shiftwidth=4 tabstop=8 colorcolumn=79
+      \ formatoptions+=croq softtabstop=4 smartindent
+      \ cinwords=if,elif,else,for,while,try,except,finally,def,class,with
+  let python_highlight_all = 1
+  set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
+augroup END
+ia pdb import pdb; pdb.set_trace()<ESC>
+"
+"
+" ===================== for javascript ==============
+let g:javascript_enable_domhtmlcss = 1
+autocmd FileType javascript setlocal omnifunc=tern#Complete
+
+
+" Run-File
 map <F12> <Esc>:w<CR>:call RunOneFile()<CR>
 function! RunOneFile()
     if &filetype=='vim'
@@ -357,52 +489,8 @@ function! RunOneFile()
     endif
 endfunction
 
-" tmux
-" Fix Cursor in TMUX
-if exists('$TMUX')
-  let &t_SI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=1\x7\<Esc>\\"
-  let &t_EI = "\<Esc>Ptmux;\<Esc>\<Esc>]50;CursorShape=0\x7\<Esc>\\"
-else
-  let &t_SI = "\<Esc>]50;CursorShape=1\x7"
-  let &t_EI = "\<Esc>]50;CursorShape=0\x7"
-endif
-" vim-tmux
-" Prompt for a command to run
-map rp :VimuxPromptCommand<CR>
-" Run a command as arg
-map rr :VimuxRunCommand
-" Run last command executed by RunVimTmuxCommand
-map rl :VimuxRunLastCommand
-" Inspect runner pane
-map ri :VimuxInspectRunner
-" Close all other tmux panes in current window
-map rx :VimuxTogglePane
-" Interrupt any command running in the runner pane
-map rs :VimuxInterruptRunner
-
-"================= For Python ==================
-" Add custom library path, let jedi autocomplete works
-if has('python')
-py << EOF
-import os.path
-import sys
-import vim
-localpath = os.path.join("/usr/local/lib/", "python%d.%d" % sys.version_info[:2], "site-packages")
-sys.path.append(localpath)
-sys.path.append(os.path.join(localpath, "nose-1.3.6-py2.7.egg"))
-if 'VIRTUAL_ENV' in os.environ:
-    project_base_dir = os.environ['VIRTUAL_ENV']
-    sys.path.insert(0, os.path.join(project_base_dir, 'lib', 'python%d.%d' % sys.version_info[:2], 'site-packages'))
-EOF
-endif
-" vim-python
-augroup vimrc-python
-  autocmd!
-  autocmd FileType python setlocal expandtab shiftwidth=4 tabstop=8 colorcolumn=79
-      \ formatoptions+=croq softtabstop=4 smartindent
-      \ cinwords=if,elif,else,for,while,try,except,finally,def,class,with
-augroup END
-ia pdb import pdb; pdb.set_trace()<ESC>
+" auto complete
+:set dictionary+=~/.vim/js.dict
 
 " fdoc is yaml
 autocmd BufRead,BufNewFile *.fdoc set filetype=yaml
