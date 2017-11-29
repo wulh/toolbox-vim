@@ -259,6 +259,15 @@ nnoremap <leader>. :lcd %:p:h<CR>
 noremap <Leader>e :e <C-R>=expand("%:p:h") . "/" <CR>
 "
 "============= plugins setting ===============
+"" javascript-lib_syntax
+autocmd BufReadPre *.js let b:javascript_lib_use_jquery = 1
+autocmd BufReadPre *.js let b:javascript_lib_use_underscore = 1
+autocmd BufReadPre *.js let b:javascript_lib_use_backbone = 1
+"" emmet-vim
+" let g:user_emmet_mode='n'
+" let g:user_emmet_install_global = 0
+" autocmd FileType html,css EmmetInstall
+"
 "" YouCompleteMe
 "
 "" NERDTree configuration
@@ -296,20 +305,23 @@ map <C-\> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 set tags=./tags;/
 
 " easy-tag
-let g:easytags_auto_update = 0
+let g:easytags_auto_update = 1
+" let g:easytags_by_filetype = 1
+let g:easytags_async = 1
 let g:easytags_updatetime_min = 10000
 let g:easytags_events = ['BufWritePost']
+let g:easytags_python_enabled = 1
 
 " jedi-vim
 let g:jedi#auto_initializatin = 0
 let g:jedi#auto_vim_configuration = 0
-let g:jedi#completions_enabled = 0
-let g:jedi#popup_on_dot = 1
+let g:jedi#completions_enabled = 1
+let g:jedi#popup_on_dot = 0
 let g:jedi#popup_select_first = 0
 let g:jedi#goto_definitions_command = "<leader>d"
 let g:jedi#documentations_command = "K"
 let g:jedi#usages_command = "<leader>n"
-let g:jedi#completions_command = "<C-Space>"
+let g:jedi#completions_command = "<C-j>"
 let g:jedi#rename_command = "<leader>r"
 let g:jedi#show_call_signatures = "0"
 let g:jedi#use_tabs_not_buffers = 0
